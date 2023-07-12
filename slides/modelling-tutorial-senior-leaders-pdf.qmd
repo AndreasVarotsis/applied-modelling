@@ -48,7 +48,7 @@ format:
 ## Relationships in our data - Correlation
 - To make a model, we need to understand how one variable in our data is affected by the others
 - A good place to start is with **correlation**
-- Correlation is a statisitcla measure of *how much two things are related to each other*, whether they increase or decrease together, or if there is no relationship at all.
+- Correlation is a statistical measure of *how much two things are related to each other*, whether they increase or decrease together, or if there is no relationship at all.
 
 ::: {.notes}
 - Remember what we're trying to achieve here: understanding how different parts of our data *connect*, so we can build a model
