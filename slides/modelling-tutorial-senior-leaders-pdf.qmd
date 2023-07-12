@@ -1,0 +1,310 @@
+---
+title: "Applied Machine Learning for Senior Leaders"
+format:
+  revealjs:
+    embed-resources: true
+    show-notes: true
+    incremental: true  
+    logo: assets/logo.png
+    slide-number: true
+---
+
+## Today...
+
+::: {.incremental}
+1. Solve a prediction challenge
+2. Explore and understand our data with Python
+3. Think about how our data is connected, and test our theories
+4. Use our findings to build our first model, and see how it performs
+5. Use our model to make predictions
+:::
+
+::: {.notes}
+- Purpose of today is too help you understand how we would approach and applied data science problem
+- We'll introduce you to a dataset you can explore, and start thinking about how different parts of your data might connect
+- We'll test those connections, and use those to build a model
+- Finally, we'll use that model to make predictions
+:::
+
+## Our Data, and our Challenge
+
+- We've built a synthetic dataset of benefit claimants
+- Each row is a claimant over the past 12 months
+- Divided into:
+  - a training dataset (270 individuals)
+  - a test dataset (30 indivuals)
+- Can we predict the behaviour of claimants in our test dataset?
+
+::: {.notes}
+- So, the dataset we'll be exploring today is a fake dataset of benefit claimants, over the 12 months.
+- We have 90% of the dataset where we know whether or not they commited fraud... and 10% where we don't.
+- Our challenge is to predict whether those 10% will commit fraud, based on what we know about the 90%
+- **Now open the dataset in Excel, and walk through it**
+- Step through each column, explaining what it means in turn
+- So, let's start thinking about our data, and our challenge...
+  - Do you think any one column in our data may affect any other column?  and if so, how?
+:::
+
+## Relationships in our data - Correlation
+- To make a model, we need to understand how one variable in our data is affected by the others
+- A good place to start is with **correlation**
+- Correlation is a statisitcla measure of *how much two things are related to each other*, whether they increase or decrease together, or if there is no relationship at all.
+
+::: {.notes}
+- Remember what we're trying to achieve here: understanding how different parts of our data *connect*, so we can build a model
+- Correlation might sound complicated, but it's really just a mental shortcut to understand how to parts of our data relate
+- It starts at 1 (perfect correlation): for example, if your weight went up by 1 kilo for every 10 cms you grew
+- In the real world, we rarely have correlations of 1 - but we might have correlations between 0.3-0.5, described as moderate
+- And of course, lots of different data points have no correlation, around 0, meaning no apparent connection
+- And you can also have negative correlation - that's just flipping the lines the other way around
+- So remember our first example? A correlation of -1 would mean mean you *lost* 1 kilo for every 10 cms you grew
+:::
+
+---
+
+## Examples of Correlation
+- How well is a person's age in years correlated with...
+
+::: {.column .fragment width="30%"}
+![](assets/perfect-correl.png){width=200 fig-align="middle"}
+
+- their age in months
+:::
+
+::: {.column .fragment width="30%"}
+![](assets/mid-correl.png){width=200 fig-align="middle"}
+
+- their income
+:::
+
+::: {.column .fragment width="30%"}
+![](assets/no-correl.png){width=200 fig-align="middle"}
+
+- the length of their name
+::::
+
+::: {.notes}
+- let's go through some examples
+- Our correlation of 1 is a perfect straight line
+- And our correlation of 0 is just random noise
+- You *can* have negative correlation - you just flip the lines around
+:::
+
+## Let's code it!
+::: {.incremental}
+
+```{.python}
+df[['age','years_in_labour_force']].corr()
+```
+
+|  | age | Years in labour force |
+|---------|:-----|------:|
+| age      | 1.0   |    0.749 |
+
+- How would you interpret these coefficients?
+- Can you find features linked to fraud?
+::::
+
+::: {.notes}
+- So how do you do those things in code? 
+- Here is us checking correlation between age and years in the labour force from our data 
+- Our right correlation shows correlation between age, and years in the labour force, and you can see that's a very strong correlation, as we'd expect
+- On the left, you can see the correlation between age and age...which is of course 1!
+- **Now it's time to get coding! **
+- You're going to open your notebooks, and follow the instructions until you reach our first checkpoint
+- Remember what we're trying to achieve, find features correlated
+**- Participants should find a weak correlation between age, and years in the labour force, and weak negative correlation with years in education**
+:::
+
+## Building our first regression
+
+```{.python code-line-numbers="|1|2|3"}
+mod = smf.ols(formula='years_in_labour_force ~ age', data=df)
+res = mod.fit()
+res.summary()
+```
+
+- For now, we'll focus on our **R-squared value**
+
+::: {.notes}
+- Remember how easy it was to code our first correlation? Now let's build our first model
+- Explain that we have three steps:
+  - first we define our model - so here we want to understand how years in the labour force is affected by age, or how you could predict someone's years in the labour force based on their age
+  - You then *fit* your model - this is where your computer does the processing to fit that model
+  - Then you ask it to see the *summary* of what it's found!
+- It's going to produce quite a complicated box, but don't worry about most of it now - instead, focus on the top right, on our *r-squared* value. It's a key measure.
+:::
+
+## Understanding R-Squared
+- R-squared is a measure that tells us how well our data fits our model
+- I like thinking of it as *how well our model fits*, in percentage terms
+- So a model with a R-squared of 1 fits 100% of our data
+- ...or like *super correlation!*
+
+::: {.notes}
+- Walk through our bullet points
+- So why is this important?  A model that fits our data is the mark of a good model!
+- In the real world, there are concerns around simply perfecting your fit - for example, over-fitting, which you'll have heard previously - but for now, we're focusing on improving our model
+:::
+
+## Regression Example - Restaurant Bills
+```{.python}
+mod = smf.ols(formula='tips ~ bill', data=all_bills)
+```
+
+```{python}
+#| echo: false
+import plotly.express as px
+import numpy as np
+import pandas as pd
+
+male_wages = np.random.randint(20,50, size=100)
+
+male_tips = male_wages * 0.1
+female_wages = np.random.randint(20,45, size=100)
+
+female_tips = female_wages * 0.2
+
+male_df = pd.DataFrame(male_wages, columns=['bill'])
+male_df['tips'] = male_tips
+male_df['gender'] = 'male'
+
+female_df = pd.DataFrame(female_wages, columns=['bill'])
+female_df['tips'] = female_tips
+female_df['gender'] = 'female'
+
+all_bills = pd.concat([male_df,female_df]).sample(frac=1).reset_index()
+
+all_bills['tips'] += np.random.uniform(0, 3, all_bills.shape[0])
+
+
+fig = px.scatter(all_bills, x='bill', y='tips',trendline="ols")
+results = px.get_trendline_results(fig)
+
+fig.update_layout(title="R-squared: " + str(results.px_fit_results.iloc[0].rsquared.round(2)))
+fig.show()
+```
+
+::: {.notes}
+- To explain how this improves on correlation, here is our dataset we've created.
+- **This is data around restaurant bills - showing the total bill on the horizontal axis, and the tip on the vertical axis.**
+- At first glance, you can see this looks *noisy*: it looks inconsistent, and we'd expect a pretty low correlation
+- And sure enough, if we were to make a model like this, we'd have a poor R-squared value
+:::
+--- 
+```{.python}
+mod = smf.ols(formula='tips ~ bill + gender', data=all_bills)
+```
+
+```{python}
+#| echo: false
+fig = px.scatter(all_bills, x='bill', y='tips',trendline="ols", color='gender')
+
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+
+mod = smf.ols(formula='tips ~ bill + C(gender)', data=all_bills)
+res = mod.fit()
+
+fig.update_layout(title="R-squared: " + str(res.rsquared.round(2)))
+fig.show()
+```
+- How does it change when we add features?
+
+::: {.notes}
+- But the magic of regression is we aren't limited to two different bits of data!  Here, we've added the gender of the waiter
+- Notice how suddenly, our data doesn't look so noisy!
+- **Now, it's turn to practise building your first regression!**
+- **WAIT UNTIL PARTICIPANTS REACH MARKER 2. Prompt about how their r-squared changed** 
+- Which was your *best* model?
+:::
+
+## Making our predictions
+
+::: {.fragment}
+- Now we have our model, how do we make predictions?
+- We just pass it our test data!
+:::
+
+::: {.fragment}
+```{.python}
+mod = smf.ols(formula='committed ~ age + years_in_labour_force + years_of_further_education+', data=train)
+res = mod.fit()
+predictions = res.predict(test)
+```
+::: 
+
+::: {.fragment}
+```{python}
+#| echo: false
+train = pd.read_csv('../data/training.csv', index_col=0)
+test = pd.read_csv('../data/testing.csv', index_col=0)
+
+mod = smf.ols(formula='committed ~ age + years_in_labour_force + years_of_further_education', data=train)
+res = mod.fit()
+
+test['prediction'] = res.predict(test).round(2)
+test[['committed','prediction']].iloc[0:2]
+```
+:::
+
+::: {.notes}
+- So, let's recap. You've explored your data, make some intuitions about how different parts relate, and used those to build a model.
+- But remember the point of this exercise is to make predictions on new data 
+- Notice how similar your code is - but instead of summarising, we ask it to predict.
+- And here are our two first predictions!
+- Notice we don't have an actual prediction... we have a number. Youl could think about this as a percent chance... but the best way to do that is set a threshold.  So let's do that!
+- **Give participants time to finish the noteboook**
+:::
+--- 
+
+- To help make a binary, *yes or no* prediction, let's decide anybody over 0.5 is included... then see how we did!
+
+::: {.fragment}
+```{python}
+#| echo: false
+test['prediction'] = res.predict(test) > 0.5
+test[['age', 'committed','prediction']].iloc[-5:].round(5)
+```
+:::
+
+::: {.notes}
+- So, here is a random sample of our predictions - you should have something broadly similar
+- 5 random participants
+:::
+## From here... to AI!
+- We've understood how our data connects, and combined it into a model
+- The same core methods and principles apply to both what you've done today, and cutting edge AI
+
+::: {.notes}
+- So, a recap. Today, you have, with code:
+  - Approached a real problem
+  - Understood your data, explored how it behaves, and built a model
+  - And used that model to make predictions
+- Those predictions might appear simple, and the model simple, but the intuition and principles, from here to AI, are based on two differences
+  - Scale
+  - Shape
+- To illustrate that...
+:::
+---
+![](assets/network.png){fig-align="middle"}
+
+::: {.notes}
+- This neural network powers models from ChatGPT to image creation
+- And each of those nodes, at it's core, is a linear model
+- There are far more, and they're more complex, but it's the first step.
+:::
+
+## Thank you!
+
+avarotsis@no10.gov.uk
+
+
+![](assets/A2-Evidence-House-Logo-1-1.png){height=200}
+
+
+::: {.notes}
+- Bring to a close
+- By giving your staff the chance to learn explore, you build the foundations for AI
+- We're keen to help - reach out with any questions, and support your staff to take part in Evidence House
+:::

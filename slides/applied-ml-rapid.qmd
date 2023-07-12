@@ -1,5 +1,5 @@
 ---
-title: "Applied Machine Learning for Senior Leaders"
+title: "Applied Prediction for Senior Leaders"
 format:
   revealjs:
     chalkboard:
