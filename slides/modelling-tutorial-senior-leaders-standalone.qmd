@@ -16,10 +16,12 @@ format:
 3. Think about how our data is connected, and test our theories
 4. Use our findings to build our first model, and see how it performs
 5. Use our model to make predictions
+- Tutorial: **bit.ly/ml-for-board**
 :::
 
 ::: {.notes}
-- Purpose of today is too help you understand how we would approach and applied data science problem
+- Purpose of today is to help you understand what is practically involved in solving a problem with AI, and give you a high level overview of the practical steps your team might be going through
+- **run through list now **
 - We'll introduce you to a dataset you can explore, and start thinking about how different parts of your data might connect
 - We'll test those connections, and use those to build a model
 - Finally, we'll use that model to make predictions
@@ -27,16 +29,18 @@ format:
 
 ## Our Data, and our Challenge
 
-- We've built a synthetic dataset of benefit claimants
-- Each row is a claimant over the past 12 months
+- We've built a fake dataset
+- Each row represents a benefit claimant, that has been suspected of fraud, over the last 12 months
 - Divided into:
-  - a training dataset (270 individuals)
-  - a test dataset (30 indivuals)
-- Can we predict the behaviour of claimants in our test dataset?
+  - a *training* dataset (270 individuals) where a human has manually verified whether fraud was commited
+  - a *test* dataset (30 indivuals) where we'll aim to predict whether or not fraud was committed
+- **Can we build a model to predict whether claimants have comitted fraud?**
 
 ::: {.notes}
-- So, the dataset we'll be exploring today is a fake dataset of benefit claimants, over the 12 months.
-- We have 90% of the dataset where we know whether or not they commited fraud... and 10% where we don't.
+- run through slide
+- This is a fake dataset, but the method will be similar to problems you're all familiar with, for example:
+  - Will pupils sucesfully graduate?
+  - Will prisoners re-offend?
 - Our challenge is to predict whether those 10% will commit fraud, based on what we know about the 90%
 - **Now open the dataset in Excel, and walk through it**
 - Step through each column, explaining what it means in turn
@@ -50,6 +54,7 @@ format:
 - Correlation is a statistical measure of *how much two things are related to each other*, whether they increase or decrease together, or if there is no relationship at all.
 
 ::: {.notes}
+- *start with slides run through*
 - Remember what we're trying to achieve here: understanding how different parts of our data *connect*, so we can build a model
 - Correlation might sound complicated, but it's really just a mental shortcut to understand how to parts of our data relate
 - It starts at 1 (perfect correlation): for example, if your weight went up by 1 kilo for every 10 cms you grew
@@ -93,7 +98,7 @@ format:
 ::: {.incremental}
 
 ```{.python}
-df[['age','years_in_labour_force']].corr()
+training[['age','years_in_labour_force']].corr()
 ```
 
 |  | age | Years in labour force |
@@ -110,7 +115,7 @@ df[['age','years_in_labour_force']].corr()
 - Our right correlation shows correlation between age, and years in the labour force, and you can see that's a very strong correlation, as we'd expect
 - On the left, you can see the correlation between age and age...which is of course 1!
 - **Now it's time to get coding! **
-- You're going to open your notebooks, and follow the instructions until you reach our first checkpoint
+- **You're going to open your notebooks, and follow the instructions until you reach our first Practical 2 - Regression**
 - Remember what we're trying to achieve, find features correlated
 **- Participants should find a weak correlation between age, and years in the labour force, and weak negative correlation with years in education**
 :::
@@ -118,37 +123,38 @@ df[['age','years_in_labour_force']].corr()
 ## Building our first regression
 
 ```{.python code-line-numbers="|1|2|3"}
-mod = smf.ols(formula='years_in_labour_force ~ age', data=df)
-res = mod.fit()
-res.summary()
+model = smf.ols(formula='years_in_labour_force ~ age', data=training)
+results = model.fit()
+results.summary()
 ```
 
 - For now, we'll focus on our **R-squared value**
 
 ::: {.notes}
 - Remember how easy it was to code our first correlation? Now let's build our first model
+- **First we'll walk through it via slides, so don't start yet.**
 - Explain that we have three steps:
   - first we define our model - so here we want to understand how years in the labour force is affected by age, or how you could predict someone's years in the labour force based on their age
   - You then *fit* your model - this is where your computer does the processing to fit that model
   - Then you ask it to see the *summary* of what it's found!
-- It's going to produce quite a complicated box, but don't worry about most of it now - instead, focus on the top right, on our *r-squared* value. It's a key measure.
+- **Python will provide you with a range of values, but won't worry too much about them for now - for now, we'll focus on only one, the R-Squared**
 :::
 
 ## Understanding R-Squared
 - R-squared is a measure that tells us how well our data fits our model
-- I like thinking of it as *how well our model fits*, in percentage terms
-- So a model with a R-squared of 1 fits 100% of our data
-- ...or like *super correlation!*
+- I like thinking of it as how "good" our model is, *in percentage terms*
+- So a model with a R-squared of 1.0 fits 100% of our data, while 0.5 would fit 50%
+- It's a little like correlation...but with a lot more potential!
 
 ::: {.notes}
 - Walk through our bullet points
-- So why is this important?  A model that fits our data is the mark of a good model!
-- In the real world, there are concerns around simply perfecting your fit - for example, over-fitting, which you'll have heard previously - but for now, we're focusing on improving our model
+- So why is this important?  Because your data should represent the real world, and a model that fits the real world, is the mark of a good model!
+- In the real world, there are concerns around simply perfecting your fit - Laura briefly discussed over-fitting, for example - but for now, we're focusing on improving our model
 :::
 
 ## Regression Example - Restaurant Bills
 ```{.python}
-mod = smf.ols(formula='tips ~ bill', data=all_bills)
+model = smf.ols(formula='tips ~ bill', data=all_bills)
 ```
 
 ```{python}
@@ -189,10 +195,11 @@ fig.show()
 - **This is data around restaurant bills - showing the total bill on the horizontal axis, and the tip on the vertical axis.**
 - At first glance, you can see this looks *noisy*: it looks inconsistent, and we'd expect a pretty low correlation
 - And sure enough, if we were to make a model like this, we'd have a poor R-squared value
+- but...
 :::
 --- 
 ```{.python}
-mod = smf.ols(formula='tips ~ bill + gender', data=all_bills)
+model = smf.ols(formula='tips ~ bill + gender', data=all_bills)
 ```
 
 ```{python}
@@ -214,7 +221,7 @@ fig.show()
 - But the magic of regression is we aren't limited to two different bits of data!  Here, we've added the gender of the waiter
 - Notice how suddenly, our data doesn't look so noisy!
 - **Now, it's turn to practise building your first regression!**
-- **WAIT UNTIL PARTICIPANTS REACH MARKER 2. Prompt about how their r-squared changed** 
+**- Participants code until practical 3**
 - Which was your *best* model?
 :::
 
@@ -227,9 +234,9 @@ fig.show()
 
 ::: {.fragment}
 ```{.python}
-mod = smf.ols(formula='committed ~ age + years_in_labour_force + years_of_further_education+', data=train)
-res = mod.fit()
-predictions = res.predict(test)
+model = smf.ols(formula='committed ~ age + years_in_labour_force + years_of_further_education+', data=train)
+results = model.fit()
+predictions = results.predict(test)
 ```
 ::: 
 
@@ -250,14 +257,13 @@ test[['committed','prediction']].iloc[0:2]
 ::: {.notes}
 - So, let's recap. You've explored your data, make some intuitions about how different parts relate, and used those to build a model.
 - But remember the point of this exercise is to make predictions on new data 
+- **Reveal the code now**
 - Notice how similar your code is - but instead of summarising, we ask it to predict.
 - And here are our two first predictions!
 - Notice we don't have an actual prediction... we have a number. Youl could think about this as a percent chance... but the best way to do that is set a threshold.  So let's do that!
 - **Give participants time to finish the noteboook**
 :::
 --- 
-
-- To help make a binary, *yes or no* prediction, let's decide anybody over 0.5 is included... then see how we did!
 
 ::: {.fragment}
 ```{python}
@@ -268,30 +274,60 @@ test[['age', 'committed','prediction']].iloc[-5:].round(5)
 :::
 
 ::: {.notes}
-- So, here is a random sample of our predictions - you should have something broadly similar
-- 5 random participants
+- So, here is a random sample of our predictions
+- 5 random participants - *we've now got predictions!*
 :::
 ## From here... to AI!
+
+::: {.nonincremental}
 - We've understood how our data connects, and combined it into a model
 - The same core methods and principles apply to both what you've done today, and cutting edge AI
+:::
 
 ::: {.notes}
 - So, a recap. Today, you have, with code:
   - Approached a real problem
   - Understood your data, explored how it behaves, and built a model
   - And used that model to make predictions
+- What you have done today is no differnet to what data scientists in your departments are doing everyday (or fancy consultants)
 - Those predictions might appear simple, and the model simple, but the intuition and principles, from here to AI, are based on two differences
   - Scale
   - Shape
 - To illustrate that...
 :::
 ---
-![](assets/network.png){fig-align="middle"}
+![](assets/network.png){fig-align="center"}
 
 ::: {.notes}
 - This neural network powers models from ChatGPT to image creation
 - And each of those nodes, at it's core, is a linear model
 - There are far more, and they're more complex, but it's the first step.
+:::
+
+## {auto-animate=true auto-animate-easing="ease-in-out"}
+ 
+![](assets/mnist-1.png){.absolute top=0 left=0}
+
+::: {.fragment}
+![](assets/mnist-2.png){.absolute top=250 right=50 data-id="box1"}
+:::
+
+::: {.notes}
+- To illustrate that, here is a dataset, where people predict handwritten numbers...
+- For example, whether something is the number two
+:::
+
+## {auto-animate=true auto-animate-easing="ease-in-out"}
+
+![](assets/mnist-2.png){fig-align="center" width=550 height=550 data-id="box1"}
+
+## {transition="fade"}
+
+![](assets/mnist-3.png){fig-align="center" width=550 height=550 data-id="box1"}
+
+::: {.notes}
+- Today, you've made predictions on 270 rows of data, between 0 and 1
+- All this two is is 170 rows of data, between 0 and 256, representing how dark pixels are
 :::
 
 ## Thank you!

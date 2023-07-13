@@ -17,6 +17,7 @@ format:
 3. Think about how our data is connected, and test our theories
 4. Use our findings to build our first model, and see how it performs
 5. Use our model to make predictions
+- Tutorial: **bit.ly/ml-for-board**
 :::
 
 ::: {.notes}
